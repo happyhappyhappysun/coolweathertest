@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import kotlin.random.FallbackThreadLocalRandom;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -119,7 +118,7 @@ public class Choose_AreaFragment extends Fragment {
         }else{
             int citycode = selectedCity.getCityCode();
             int provincecode = selectedProvince.getProvinceCode();
-            String address = "http://guolin.tech/api/china"+ provincecode +"/"+ citycode;
+            String address = "http://guolin.tech/api/china/"+ provincecode +"/"+ citycode;
             queryFromServer(address,"country");
         }
     }
@@ -155,7 +154,7 @@ public class Choose_AreaFragment extends Fragment {
             }
         }else{
             int provinceCode = selectedProvince.getProvinceCode();
-            String address = "http://guolin.tech/api/china"+ provinceCode;
+            String address = "http://guolin.tech/api/china/"+ provinceCode;
             queryFromServer(address,"city");
         }
     }
@@ -193,6 +192,7 @@ public class Choose_AreaFragment extends Fragment {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            closeProgressDialog();
                             if("province".equals(type)){
                                 queryProvinces();
                             } else if ("city".equals(type)) {
@@ -211,7 +211,7 @@ public class Choose_AreaFragment extends Fragment {
 
     private void showProgressDialog() {
         if(progressDialog==null){
-            progressDialog = new ProgressDialog(MyApplication.getContext());
+            progressDialog = new ProgressDialog(getActivity());
             progressDialog.setMessage("正在加载");
             progressDialog.setCanceledOnTouchOutside(false);
         }
