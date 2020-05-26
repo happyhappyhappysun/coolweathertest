@@ -13,6 +13,10 @@
         android:scaleType="centerCrop"/>
 <!--    scrollbars设置滚动条，四种，overScrollMode设置滑动到边缘时无效果模式
 https://blog.csdn.net/hpp_1225/article/details/89352946-->
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent">
 <ScrollView
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -31,5 +35,5 @@ https://blog.csdn.net/hpp_1225/article/details/89352946-->
     <include layout="@layout/suggestions"/>
 </LinearLayout>
 </ScrollView>
-
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </FrameLayout>

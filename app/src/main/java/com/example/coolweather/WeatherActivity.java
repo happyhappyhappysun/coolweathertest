@@ -1,6 +1,7 @@
 package com.example.coolweather;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -49,6 +50,8 @@ public class WeatherActivity extends AppCompatActivity {
     private TextView sportText;
 
     private ImageView bingPicImg;
+    private String mWeatherId;
+    private SwipeRefreshLayout swipeRefreshLayout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,14 +79,23 @@ public class WeatherActivity extends AppCompatActivity {
             String weatherId = getIntent().getStringExtra("weather_id");
             weatherLayout.setVisibility(View.INVISIBLE);
             requestWeather(weatherId, weather, "now");
+            mWeatherId = weatherId;
         }else{
             // 有缓存时直接读取数据(缓存中放的就是json字符串)
+
             weather = Utility.handleWeatherResponse(nowString,weather,"now");
             weather = Utility.handleWeatherResponse(forecastString, weather, "forecast");
             weather = Utility.handleWeatherResponse(lifestyleString, weather, "lifestyle");
+            mWeatherId = weather.basic.weatherId;
             assert weather != null;//判断语句
             showWeatherInfo(weather);
         }
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                requestWeather(mWeatherId, new Weather(), "now");
+            }
+        });
     }
 
     private void loadBingPic() {
@@ -135,6 +147,7 @@ public class WeatherActivity extends AppCompatActivity {
                                 Toast.makeText(WeatherActivity.this, "获取预报天气失败", Toast.LENGTH_SHORT).show();
                                 break;
                         }
+                        swipeRefreshLayout.setRefreshing(false);
                     }
                 });
             }
@@ -166,7 +179,7 @@ public class WeatherActivity extends AppCompatActivity {
                         }else {
                             Toast.makeText(WeatherActivity.this, "请求到的数据出错", Toast.LENGTH_SHORT).show();
                         }
-
+                        swipeRefreshLayout.setRefreshing(false);
                     }
                 });
             }
@@ -242,6 +255,8 @@ public class WeatherActivity extends AppCompatActivity {
         sportText = findViewById(R.id.sport_text);
         degreeText = findViewById(R.id.degree_text);
         bingPicImg = findViewById(R.id.bing_pic_img);
+        swipeRefreshLayout = findViewById(R.id.swipe_refresh);
+        swipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
     }
     /**
      * 根据不同的安卓版本实现状态栏全透状态栏
