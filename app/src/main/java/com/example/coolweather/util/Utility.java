@@ -5,10 +5,16 @@ import android.text.TextUtils;
 import com.example.coolweather.db.City;
 import com.example.coolweather.db.County;
 import com.example.coolweather.db.Province;
+import com.example.coolweather.gosn.Forecast;
+import com.example.coolweather.gosn.Now;
+import com.example.coolweather.gosn.Weather;
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 解析json数据，网络请求返回的是json形式的数据
@@ -73,6 +79,36 @@ public class Utility {
             }
         }
         return false;
+    }
+    // 将返回的数据解析成实体类,注意哦：天气由于不同的请求参数就会有不同的结果。所以这里采用分情况而定,打断点看一下是什么数据
+
+    /**
+     * 这里行不通的话就自己写一个接口，类似郭霖那个，然后获取到所有的数据，就是多调几次网路请求.？？？？？？？？？？？？？
+     */
+    public static Weather handleWeatherResponse(String response, Weather weather, String cate){
+            try {
+                JSONObject object = new JSONObject(response);
+                JSONArray jsonArray = object.getJSONArray("HeWeather6");
+                String weatherContent = jsonArray.getJSONObject(0).toString();
+                if("now".equals(cate)){
+                    Weather nowWeather = new Gson().fromJson(weatherContent,Weather.class);
+                    weather.basic = nowWeather.basic;
+                    weather.update = nowWeather.update;
+                    weather.now = nowWeather.now;
+                }else if("forecast".equals(cate)){
+                    Weather forecastWeather = new Gson().fromJson(weatherContent, Weather.class);
+                    weather.forecastList = forecastWeather.forecastList;
+                    //weather.status = forecastWeather.status;
+                }else if("lifestyle".equals(cate)){
+                    Weather lifeStyleWeather = new Gson().fromJson(weatherContent, Weather.class);
+                    weather.lifeStyleList = lifeStyleWeather.lifeStyleList;
+                    //weather.status = lifeStyleWeather.status;
+                }
+                return weather;
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        return null;
     }
 }
 

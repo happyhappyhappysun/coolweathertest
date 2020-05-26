@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".WeatherActivity"
+    android:background="@color/colorPrimary">
+<!--    scrollbars设置滚动条，四种，overScrollMode设置滑动到边缘时无效果模式
+https://blog.csdn.net/hpp_1225/article/details/89352946-->
+<ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:scrollbars = "none"
+    android:overScrollMode="never"
+    android:id="@+id/weather_layout">
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+    <include layout="@layout/title"/>
+    <include layout="@layout/now"/>
+    <include layout="@layout/forecast"/>
+    <include layout="@layout/aqi"/>
+    <include layout="@layout/suggestions"/>
+</LinearLayout>
+</ScrollView>
+
+</FrameLayout>
