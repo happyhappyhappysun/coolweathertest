@@ -6,6 +6,11 @@
     android:layout_height="match_parent"
     tools:context=".WeatherActivity"
     android:background="@color/colorPrimary">
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/bing_pic_img"
+        android:scaleType="centerCrop"/>
 <!--    scrollbars设置滚动条，四种，overScrollMode设置滑动到边缘时无效果模式
 https://blog.csdn.net/hpp_1225/article/details/89352946-->
 <ScrollView
@@ -17,7 +22,8 @@ https://blog.csdn.net/hpp_1225/article/details/89352946-->
 <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:fitsSystemWindows="true">
     <include layout="@layout/title"/>
     <include layout="@layout/now"/>
     <include layout="@layout/forecast"/>

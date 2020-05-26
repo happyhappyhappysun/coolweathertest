@@ -3,16 +3,22 @@ package com.example.coolweather;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.coolweather.gosn.Forecast;
 import com.example.coolweather.gosn.LifeStyle;
 import com.example.coolweather.gosn.Weather;
@@ -41,17 +47,27 @@ public class WeatherActivity extends AppCompatActivity {
     private TextView comfortText;
     private TextView drsgText;
     private TextView sportText;
+
+    private ImageView bingPicImg;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_weather);
         init();
+        setStatusBarFullTransparent();
         Weather weather = new Weather();
         //缓存中分别储存的。
         SharedPreferences  prefs = MyApplication.getContext().getSharedPreferences("weather_data", MODE_PRIVATE);
 //        SharedPreferences.Editor editor = prefs.edit();
 //        editor.clear();
 //        editor.commit();
+        String bingPic = prefs.getString("bing_pic", null);
+        if(bingPic != null){
+            Glide.with(this).load(bingPic).into(bingPicImg);
+        }else{
+            loadBingPic();
+        }
+
         String nowString = prefs.getString("now",null);
         String forecastString = prefs.getString("forecast",null);
         String lifestyleString = prefs.getString("lifestyle", null);
@@ -68,6 +84,32 @@ public class WeatherActivity extends AppCompatActivity {
             assert weather != null;//判断语句
             showWeatherInfo(weather);
         }
+    }
+
+    private void loadBingPic() {
+        String requestBingPic = "http://guolin.tech/api/bing_pic";
+        HttpUtil.sendOkHttpRequest(requestBingPic, new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                Toast.makeText(WeatherActivity.this, "壁纸加载出错", Toast.LENGTH_SHORT).show();
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                final String bingPic = response.body().string();
+                SharedPreferences.Editor editor = getApplicationContext().getSharedPreferences("weather_data", MODE_PRIVATE).edit();
+                editor.putString("bing_pic", bingPic);
+                editor.apply();
+                //更新UI
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Glide.with(WeatherActivity.this).load(bingPic).into(bingPicImg);
+                    }
+                });
+            }
+        });
     }
 
     /*
@@ -129,6 +171,7 @@ public class WeatherActivity extends AppCompatActivity {
                 });
             }
         });
+        loadBingPic();
     }
 
     private String reUrl(String cate, String weatherId) {
@@ -198,5 +241,23 @@ public class WeatherActivity extends AppCompatActivity {
         drsgText = findViewById(R.id.car_wash_text);
         sportText = findViewById(R.id.sport_text);
         degreeText = findViewById(R.id.degree_text);
+        bingPicImg = findViewById(R.id.bing_pic_img);
+    }
+    /**
+     * 根据不同的安卓版本实现状态栏全透状态栏
+     */
+    protected void setStatusBarFullTransparent() {
+        if (Build.VERSION.SDK_INT >= 21) {//21表示5.0
+            Window window = getWindow();
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(Color.TRANSPARENT);
+        } else if (Build.VERSION.SDK_INT >= 19) {//19表示4.4
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            //虚拟键盘也透明
+            //getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+        }
     }
 }
