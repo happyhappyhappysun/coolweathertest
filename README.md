@@ -8,10 +8,10 @@ This is a testproject!
 然后采用配置文件将实体类和表映射起来。
 3.网络请求（OKHttp）
 //这里是无返回值的原因在于接口回调传递参数，OKhttp3里面自带接口
-public static void sendOkHttpRequest(final String address, final okhttp3.Callback callback) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
+        public static void sendOkHttpRequest(final String address, final okhttp3.Callback callback) {
+                new Thread(new Runnable() {
+                @Override
+                public void run() {
                     OkHttpClient client = new OkHttpClient();
                     Request request = new Request.Builder().url(address).build();
                     client.newCall(request).enqueue(callback);
@@ -28,7 +28,7 @@ provinceList = LitePal.findAll(Province.class);
 cityList = LitePal.where("provinceid = ?",String.valueOf(selectedProvince.getId())).find(City.class);
 网络请求是在子线程进行的，OKhttp封装好的，但是UI更新需要回到主线程。
 
-HttpUtil.sendOkHttpRequest(address, new Callback() {
+        HttpUtil.sendOkHttpRequest(address, new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 getActivity().runOnUiThread(new Runnable() {
@@ -39,7 +39,7 @@ HttpUtil.sendOkHttpRequest(address, new Callback() {
                     }
                 });
             }
-
+            
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 String responseText = response.body().string();
