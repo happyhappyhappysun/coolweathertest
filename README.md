@@ -8,12 +8,15 @@ This is a testproject!
 然后采用配置文件将实体类和表映射起来。
 3.网络请求（OKHttp）
 //这里是无返回值的原因在于接口回调传递参数，OKhttp3里面自带接口
-
-public static void sendOkHttpRequest(String address,okhttp3.Callback callback){
-    OkHttpClient client = new OkHttpClient();
-    Request request = new Request.Builder().url(address).build();
-    client.newCall(request).enqueue(callback);
-}
+public static void sendOkHttpRequest(final String address, final okhttp3.Callback callback) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                    OkHttpClient client = new OkHttpClient();
+                    Request request = new Request.Builder().url(address).build();
+                    client.newCall(request).enqueue(callback);
+            }
+        }).start();
 
 4. 需要一个碎片，由于获取城市相关信息会在很多地方重用，所以这里采用碎片而不是活动形式。
 更改style.xml中代码，修改主题，采用无actionbar的格式。
@@ -26,38 +29,48 @@ cityList = LitePal.where("provinceid = ?",String.valueOf(selectedProvince.getId(
 网络请求是在子线程进行的，OKhttp封装好的，但是UI更新需要回到主线程。
 
 HttpUtil.sendOkHttpRequest(address, new Callback() {
-    @Override
-    public void onFailure(@NotNull Call call, @NotNull IOException e) {
-    }
-    @Override
-    public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-        String responseText = response.body().string();
-        boolean result = false;//这里是标志联网查询的结果，如果请求成功那么就可以更新UI
-        if("province".equals(type)){
-            result = Utility.handleProvinceResponse(responseText);
-        } else if ("city".equals(type)) {
-            result = Utility.handleCityResponse(responseText);
-        }else if("country".equals(type)){
-            result = Utility.handleCountyResponse(responseText);
-        }
-        //由于里面有UI更新，textview和listview更新，所以需要回到主线程操作
-        if(result){
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if("province".equals(type)){
-                        queryProvinces();
-                    } else if ("city".equals(type)) {
-                        queryCities();
-                    }else if("country".equals(type)){
-                        queryCounties();
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        closeProgressDialog();
+                        Toast.makeText(MyApplication.getContext(),"加载失败",Toast.LENGTH_SHORT).show();
                     }
-                }
-            });
-        }
-    }
-});
+                });
+            }
 
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                String responseText = response.body().string();
+                boolean result = false;//这里是标志联网查询的结果，如果请求成功那么就可以更新UI
+                if("province".equals(type)){
+                    result = Utility.handleProvinceResponse(responseText);
+                } else if ("city".equals(type)) {
+                    result = Utility.handleCityResponse(responseText,selectedProvince.getId());
+
+                }else if("country".equals(type)){
+                    result = Utility.handleCountyResponse(responseText,selectedCity.getId());
+                }
+                //由于里面有UI更新，textview和listview更新，所以需要回到主线程操作
+                if(result){
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            closeProgressDialog();
+                            if("province".equals(type)){
+                                queryProvinces();
+                            } else if ("city".equals(type)) {
+                                queryCities();
+                            }else if("country".equals(type)){
+                                queryCounties();
+                            }
+                        }
+                    });
+
+                }
+            }
+        });
 获取城市信息的步骤以及关键：
 1.	首先需要三个常量标志位（以后程序有几种情况就用几个常量来表示），分别代表目前是哪个级别（省、市、县），然后对不同级别进行不同操作
 LEVEL_PROVINCE、LEVEL_CITY、LEVEL_COUNTY
