@@ -83,17 +83,17 @@ public List<Forecast> forecastList;
  
 3.	天气接口调用：分为不同的type，有不同的数据返回。
 
-https://free-api.heweather.net/s6/weather/now?location=beijing&key=93ed3bc8991a4841bdf9d1122fc46bfc
+https://free-api.heweather.net/s6/weather/now?location=beijing&key=your key
 
 或者：
 
-https://free-api.heweather.net/s6/weather/now?location=CN101050101&key=93ed3bc8991a4841bdf9d1122fc46bfc
+https://free-api.heweather.net/s6/weather/now?location=CN101050101&key=your key
 
  
-https://free-api.heweather.net/s6/weather/forecast?location=CN101050101&key=93ed3bc8991a4841bdf9d1122fc46bfc
+https://free-api.heweather.net/s6/weather/forecast?location=CN101050101&key=your key
 
  
-https://free-api.heweather.net/s6/weather/lifestyle?location=CN101050101&key=93ed3bc8991a4841bdf9d1122fc46bfc
+https://free-api.heweather.net/s6/weather/lifestyle?location=CN101050101&key=your key
  
 4.	GSON 处理数据：
 主要用于处理较为复杂的数据，前提是准备好对应的实体类，其中要注意：字段名和json数据的节点名要对应，可以采用注解方式。
