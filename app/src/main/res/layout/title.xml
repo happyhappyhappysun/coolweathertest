@@ -4,6 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_height="?attr/actionBarSize"
     android:orientation="horizontal">
+    <Button
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:background="@drawable/home"
+        android:layout_marginLeft="10dp"
+        android:layout_alignParentLeft="true"
+
+        android:id="@+id/nav_button"/>
 <TextView
     android:id="@+id/title_city"
     android:layout_width="wrap_content"

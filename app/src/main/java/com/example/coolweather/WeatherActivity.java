@@ -1,8 +1,11 @@
 package com.example.coolweather;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
@@ -13,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -23,6 +27,7 @@ import com.bumptech.glide.Glide;
 import com.example.coolweather.gosn.Forecast;
 import com.example.coolweather.gosn.LifeStyle;
 import com.example.coolweather.gosn.Weather;
+import com.example.coolweather.service.AutoUpdateService;
 import com.example.coolweather.util.HttpUtil;
 import com.example.coolweather.util.Utility;
 
@@ -50,8 +55,10 @@ public class WeatherActivity extends AppCompatActivity {
     private TextView sportText;
 
     private ImageView bingPicImg;
-    private String mWeatherId;
-    private SwipeRefreshLayout swipeRefreshLayout;
+    public String mWeatherId;
+    public SwipeRefreshLayout swipeRefreshLayout;
+    public DrawerLayout drawerLayout;
+    private Button navButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -98,6 +105,7 @@ public class WeatherActivity extends AppCompatActivity {
         });
     }
 
+
     private void loadBingPic() {
         String requestBingPic = "http://guolin.tech/api/bing_pic";
         HttpUtil.sendOkHttpRequest(requestBingPic, new Callback() {
@@ -117,7 +125,7 @@ public class WeatherActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Glide.with(WeatherActivity.this).load(bingPic).into(bingPicImg);
+                        Glide.with(getApplicationContext()).load(bingPic).into(bingPicImg);
                     }
                 });
             }
@@ -127,7 +135,7 @@ public class WeatherActivity extends AppCompatActivity {
     /*
     联网查询天气情况
      */
-    private void requestWeather(final String weatherId, final Weather weather, final String cate) {
+    public void requestWeather(final String weatherId, final Weather weather, final String cate) {
         String requestUrl = reUrl(cate, weatherId);
         Log.d("UUU", requestUrl);
         HttpUtil.sendOkHttpRequest(requestUrl, new Callback() {
@@ -239,6 +247,11 @@ public class WeatherActivity extends AppCompatActivity {
         }
         //最后记得将布局显示出来
         weatherLayout.setVisibility(View.VISIBLE);
+
+        //每次更新天气界面的时候就会开启这个服务
+        Intent intent = new Intent(this, AutoUpdateService.class);
+        startService(intent);
+
     }
 
     private void init() {
@@ -257,6 +270,14 @@ public class WeatherActivity extends AppCompatActivity {
         bingPicImg = findViewById(R.id.bing_pic_img);
         swipeRefreshLayout = findViewById(R.id.swipe_refresh);
         swipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
+        drawerLayout = findViewById(R.id.drawer_layout);
+        navButton = findViewById(R.id.nav_button);
+        navButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                drawerLayout.openDrawer(GravityCompat.START);
+            }
+        });
     }
     /**
      * 根据不同的安卓版本实现状态栏全透状态栏
@@ -274,5 +295,11 @@ public class WeatherActivity extends AppCompatActivity {
             //虚拟键盘也透明
             //getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Glide.with(getApplicationContext()).pauseRequests();
     }
 }

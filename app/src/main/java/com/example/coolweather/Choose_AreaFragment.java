@@ -17,11 +17,13 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 
 import com.example.coolweather.db.City;
 import com.example.coolweather.db.County;
 import com.example.coolweather.db.Province;
+import com.example.coolweather.gosn.Weather;
 import com.example.coolweather.util.HttpUtil;
 import com.example.coolweather.util.Utility;
 
@@ -59,6 +61,7 @@ public class Choose_AreaFragment extends Fragment {
     private County selectedCounty;
 
     private ProgressDialog progressDialog;
+    private DrawerLayout drawerLayout;
 
 
 
@@ -71,6 +74,7 @@ public class Choose_AreaFragment extends Fragment {
         adapter = new ArrayAdapter<>(MyApplication.getContext(),android.R.layout.simple_list_item_1,dataList);
         listView = view.findViewById(R.id.list_view);
         listView.setAdapter(adapter);
+
         return view;
     }
 
@@ -92,10 +96,18 @@ public class Choose_AreaFragment extends Fragment {
                     queryCounties();
                 }else if(currentLevel==LEVEL_COUNTY){
                     String weatherId = countyList.get(position).getWeatherId();
-                    Intent intent = new Intent(getActivity(),WeatherActivity.class);
-                    intent.putExtra("weather_id", weatherId);
-                    startActivity(intent);
-                    getActivity().finish();
+                    if(getActivity() instanceof MainActivity){
+                        Intent intent = new Intent(getActivity(),WeatherActivity.class);
+                        intent.putExtra("weather_id", weatherId);
+                        startActivity(intent);
+                    }else if(getActivity() instanceof WeatherActivity){
+                        WeatherActivity activity = (WeatherActivity) getActivity();
+                        activity.drawerLayout.closeDrawers();
+                        activity.swipeRefreshLayout.setRefreshing(true);
+                        activity.mWeatherId = weatherId;
+                        activity.requestWeather(weatherId,new Weather(),"now");
+                    }
+                    //getActivity().finish();
                 }
             }
         });
